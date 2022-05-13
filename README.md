@@ -3,7 +3,9 @@
 Change csv_name to input data file, data.csv is merged data file with behavioral data. Machine learning techniques are applied to identify important features and correlations, build models, and predict behavioral data.
 
 ## Functions
-25/75 test/train split is used. Each function is duplicated to assess data with and without sex taken into account. Regression is used due to the uncategorical nature of the behavioral data.
+15/85 test/train split is used. Each function is duplicated to assess data with and without sex taken into account. Regression is used due to the uncategorical nature of the behavioral data.
+
+Note: Test/train split was found by averaging mean absolute errors and mean squared errors (separately) across multiple trials.
 
 Feature Selction
 ------------

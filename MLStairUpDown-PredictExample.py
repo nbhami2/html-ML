@@ -49,6 +49,94 @@ df = df._get_numeric_data()
 # In[ ]:
 
 
+#Find best test/train split using Random Forest Regression models - not all features are known to be linear
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+
+X = df.drop('fft_stair_ds_tester1', axis=1)
+y = df['fft_stair_ds_tester1']
+
+
+# 25% test size
+X_train_25, X_test_25, y_train_25, y_test_25 = train_test_split(X, y, test_size=0.25, random_state=42)
+ss = StandardScaler()
+X_train_25_scaled = ss.fit_transform(X_train_25)
+X_test_25_scaled = ss.transform(X_test_25)
+
+# 20% test size
+X_train_20, X_test_20, y_train_20, y_test_20 = train_test_split(X, y, test_size=0.2, random_state=42)
+ss = StandardScaler()
+X_train_20_scaled = ss.fit_transform(X_train_20)
+X_test_20_scaled = ss.transform(X_test_20)
+
+# 15% test size
+X_train_15, X_test_15, y_train_15, y_test_15 = train_test_split(X, y, test_size=0.15, random_state=42)
+ss = StandardScaler()
+X_train_15_scaled = ss.fit_transform(X_train_15)
+X_test_15_scaled = ss.transform(X_test_15)
+
+# 12.5% test size
+X_train_125, X_test_125, y_train_125, y_test_125 = train_test_split(X, y, test_size=0.125, random_state=42)
+ss = StandardScaler()
+X_train_125_scaled = ss.fit_transform(X_train_125)
+X_test_125_scaled = ss.transform(X_test_125)
+
+#Linear Regression
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+from sklearn.ensemble import RandomForestRegressor
+
+mae25, mse25 = [],[]
+mae20, mse20 = [],[]
+mae15, mse15 = [],[]
+mae125, mse125 = [],[]
+for i in range(0,10):
+    model = RandomForestRegressor()
+    model.fit(X_train_25,y_train_25)
+    result = model.predict(X_test_25)
+    mae = mean_absolute_error(y_test_25, result)
+    mse = mean_squared_error(y_test_25, result)
+    mae25.append(mae)
+    mse25.append(mse)
+
+    model = RandomForestRegressor()
+    model.fit(X_train_20,y_train_20)
+    result = model.predict(X_test_20)
+    mae = mean_absolute_error(y_test_20, result)
+    mse = mean_squared_error(y_test_20, result)
+    mae20.append(mae)
+    mse20.append(mse)
+
+    model = RandomForestRegressor()
+    model.fit(X_train_15,y_train_15)
+    result = model.predict(X_test_15)
+    mae = mean_absolute_error(y_test_15, result)
+    mse = mean_squared_error(y_test_15, result)
+    mae15.append(mae)
+    mse15.append(mse)
+
+    model = RandomForestRegressor()
+    model.fit(X_train_125,y_train_125)
+    result = model.predict(X_test_125)
+    mae = mean_absolute_error(y_test_125, result)
+    mse = mean_squared_error(y_test_125, result)
+    mae125.append(mae)
+    mse125.append(mse)
+print('Average Mean Absolute Error (25%):'+str(sum(mae25)/len(mae25)))
+print('Average Mean Squared Error (25%):'+str(sum(mse25)/len(mse25)))
+print('Average Mean Absolute Error (20%):'+str(sum(mae20)/len(mae20)))
+print('Average Mean Squared Error (20%):'+str(sum(mse20)/len(mse20)))
+print('Average Mean Absolute Error (15%):'+str(sum(mae15)/len(mae15)))
+print('Average Mean Squared Error (15%):'+str(sum(mse15)/len(mse15)))
+print('Average Mean Absolute Error (12.5%):'+str(sum(mae125)/len(mae125)))
+print('Average Mean Squared Error (12.5%):'+str(sum(mse125)/len(mse125)))
+
+#15% test split yields lowest average errors across multiple runs
+
+
+# In[ ]:
+
+
 # X = df.iloc[:,0:df.columns.size].values
 # Y = df['fft_stair_us_tester1'].values
 
@@ -60,8 +148,8 @@ from sklearn.model_selection import train_test_split
 X = df.drop('fft_stair_ds_tester1', axis=1)
 X2 = df.drop(['fft_stair_ds_tester1','Sex'], axis=1) #no sex
 y = df['fft_stair_ds_tester1']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
-X2_train, X2_test, y2_train, y2_test = train_test_split(X2, y, test_size=0.25, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.15, random_state=42)
+X2_train, X2_test, y2_train, y2_test = train_test_split(X2, y, test_size=0.15, random_state=42)
 
 ss = StandardScaler()
 X_train_scaled = ss.fit_transform(X_train)
@@ -227,6 +315,23 @@ print('Mean Squared Error:'+str(mse))
 # In[ ]:
 
 
+#Random Forest Regression, All features (with Sex)
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_squared_error
+
+model = RandomForestRegressor()
+model.fit(X_train,y_train)
+result = model.predict(X_test)
+mae = mean_absolute_error(y_test, result)
+mse = mean_squared_error(y_test, result)
+print('Mean Absolute Error:'+str(mae))
+print('Mean Squared Error:'+str(mse))
+
+
+# In[ ]:
+
+
+#linear regression with feature selections used above
 def select(X_train, y_train, X_test):
     fs = SelectKBest(score_func=f_regression, k=10)
     fs.fit(X_train, y_train)
@@ -259,6 +364,50 @@ print('MAE3: %.3f' % mae3)
 print('MSE3: %.3f' % mse3)
 
 model = LinearRegression()
+model.fit(X_train_fs2NoSex, y_train)
+result4 = model.predict(X_test_fs2NoSex)
+mae4 = mean_absolute_error(y_test, result4)
+mse4 = mean_squared_error(y_test, result4)
+print('MAE4: %.3f' % mae4)
+print('MSE4: %.3f' % mse4)
+
+
+# In[ ]:
+
+
+#Random Forest regression with feature selections used above
+def select(X_train, y_train, X_test):
+    fs = SelectKBest(score_func=f_regression, k=10)
+    fs.fit(X_train, y_train)
+    X_train_fs = fs.transform(X_train)
+    X_test_fs = fs.transform(X_test)
+    return X_train_fs, X_test_fs, fs
+ 
+model = RandomForestRegressor()
+model.fit(X_train_fs, y_train)
+result1 = model.predict(X_test_fs)
+mae1 = mean_absolute_error(y_test, result1)
+mse1 = mean_squared_error(y_test, result1)
+print('MAE1: %.3f' % mae1)
+print('MSE1: %.3f' % mse1)
+
+model = RandomForestRegressor()
+model.fit(X_train_fsNoSex, y_train)
+result2 = model.predict(X_test_fsNoSex)
+mae2 = mean_absolute_error(y_test, result2)
+mse2 = mean_squared_error(y_test, result2)
+print('MAE2: %.3f' % mae2)
+print('MSE2: %.3f' % mse2)
+
+model = RandomForestRegressor()
+model.fit(X_train_fs2, y_train)
+result3 = model.predict(X_test_fs2)
+mae3 = mean_absolute_error(y_test, result3)
+mse3 = mean_squared_error(y_test, result3)
+print('MAE3: %.3f' % mae3)
+print('MSE3: %.3f' % mse3)
+
+model = RandomForestRegressor()
 model.fit(X_train_fs2NoSex, y_train)
 result4 = model.predict(X_test_fs2NoSex)
 mae4 = mean_absolute_error(y_test, result4)
